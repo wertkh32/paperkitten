@@ -1,6 +1,12 @@
 function [en, derv] = ProjDyn_Energy(  numEle, numNode, Tt, Pt, Pold, P0, M, A, Vol, W, fixed, h, vel, fext )
 %GRADIENT NEEDS VELOCITY ADDED
 
+ for i=1:numNode
+     if(fixed(i,1) == 1)
+         Pt(:,i) = P0(:,i);
+     end
+ end
+
  q = reshape(Pt,numNode * 3,1);
  qn = reshape(Pold,numNode * 3,1);
  q0 = reshape(P0, numNode * 3,1);
@@ -39,7 +45,7 @@ function [en, derv] = ProjDyn_Energy(  numEle, numNode, Tt, Pt, Pold, P0, M, A, 
     for j=1:4
 
         for k=1:3
-            dF = deform_grad_t_derv(k, j, Dm(:,:,i));
+            dF = deform_grad_Ds_derv(k, j, Dm(:,:,i));
             dR = rotation_derv(R(:,:,i),S(:,:,i),dF);
             temp( (index(j) - 1) * 3 + k, 1 ) = -q' * L' * blkdiag(dR,dR,dR) * L * q0 * W(i) * Vol(i);
             
@@ -51,6 +57,11 @@ function [en, derv] = ProjDyn_Energy(  numEle, numNode, Tt, Pt, Pold, P0, M, A, 
     
  end
    
+  for i=1:numNode
+     if(fixed(i,1) == 1)
+         derv((i-1) * 3 + 1:(i-1) * 3 + 3) = 0;
+     end
+ end
    % disp(derv);
  
 end
@@ -61,11 +72,11 @@ function [dP] = piola_stress_Derv(i,j,F,R,S,Dm,miu,lambda)
     dP = 2 * miu * dF + lambda * trace(R' * dF) * R + (lambda * trace(S - eye(3)) - 2 * miu) * dR;
 end
 
-function [ dF ] = deform_grad_derv(i, j, F, Dm)
+function [ dF ] = deform_grad_Dm_derv(i, j, F, Dm)
     dF = -F * Dm_derv(i,j) * inv(Dm);
 end
 
-function [ dF ] = deform_grad_t_derv(i, j, Dm)
+function [ dF ] = deform_grad_Ds_derv(i, j, Dm)
     dF = Dm_derv(i,j) * inv(Dm);
 end
 
@@ -90,6 +101,7 @@ function [dDmInvT] = DmInvT_derv(i,j,Dm)
     dDmInvT = (-Bm * Dm_derv(i,j) * Bm)';
 end
 
+%works for Ds too hahahaha
 function [dDm] = Dm_derv(i,j)
     mat = zeros(3,3);
     if(j < 4)
