@@ -22,7 +22,7 @@ damping = 0.999;
 
 Ptt = Pt;
 
-handle = plot_strain(numEle,Tt,P0,Pt);
+handle = plot_strain(numEle,Tt,Pt,Pt);
 axis([-10,20,-20,20,-10,20]);
 
 M = diag(kron(mass,[1;1;1]));
@@ -32,15 +32,33 @@ M = diag(kron(mass,[1;1;1]));
 %qn = reshape(Pt, numNode * 3, 1);
 h = (1.0/60);
 
+% disp(ProjDyn_Energy(numEle, numNode, Tt, Ptt, P0, M, A, vol, W, fixed, h, vel, fext));
+% 
+% options=optimset('LargeScale','off','GradObj','on','DerivativeCheck','off','Display','iter','MaxIter',100,'TolFun',1e-8,'TolX',1e-8);
+% [Pout, objval] = fminunc(@(x)(ProjDyn_Energy(numEle, numNode, Tt, x, P0, M, A, vol, W, fixed, h, vel, fext)),Ptt,options);
+% 
+% for i=1:3
+%     Pold = Ptt;
+%     [Ptt, objval] = fminunc(@(x)(ProjDyn_Energy(numEle, numNode, Tt, x, P0, M, A, vol, W, fixed, h, vel, fext)),Ptt,options);
+%     vel = reshape( (Ptt - Pold) / h, numNode * 3,1);
+%     disp(vel);
+%     %Ptt = reshape(Ptt,numEle,numNode);
+%     %disp(vel);
+%     vel = vel * damping;
+%     plot_timestep( handle, numEle ,Tt, Ptt );
+%     pause(1/60);
+% 
+% end
+
+
 for i=1:1000
     [Ptt, vel] = ProjDyn_timestep( numEle, numNode, Tt, Ptt, P0, M, A, vol, W, fixed, h, vel, fext );
     Ptt = reshape(Ptt,3,5);
-    disp(vel);
+    %disp(vel);
     vel = vel * damping;
-    %plot_strain(2,Tt,P,Ptt);
     plot_timestep( handle, numEle ,Tt, Ptt );
     pause(1/60);
-    %axis([0,20,-20,20,0,20]);
+
 end
 
 %s = qn + h * vel + h * h * M\fext;
