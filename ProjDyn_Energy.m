@@ -1,9 +1,10 @@
-function [en, derv] = ProjDyn_Energy(  numEle, numNode, Tt, Pt, P0, M, A, Vol, W, fixed, h, vel, fext )
-//GRADIENT NEEDS VELOCITY ADDED
+function [en, derv] = ProjDyn_Energy(  numEle, numNode, Tt, Pt, Pold, P0, M, A, Vol, W, fixed, h, vel, fext )
+%GRADIENT NEEDS VELOCITY ADDED
 
  q = reshape(Pt,numNode * 3,1);
+ qn = reshape(Pold,numNode * 3,1);
  q0 = reshape(P0, numNode * 3,1);
- sn = q + h * vel + h * h * M\fext;
+ sn = qn + h * vel + h * h * M\fext;
  
  %disp(vel);
  
