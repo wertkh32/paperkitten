@@ -29,7 +29,7 @@ M = diag(kron(mass,[1;1;1]));
 
 [A vol] = ProjDyn_Init(numEle,numNode,Tt,P0,M,W,60);
 
-%qn = reshape(Pt, numNode * 3, 1);
+
 h = (1.0/60);
 
 
@@ -37,23 +37,26 @@ h = (1.0/60);
 %%OPTMIZATION%%APPROACH%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Pold = Ptt;
 
-disp(ProjDyn_Energy(numEle, numNode, Tt, Ptt, Pold,P0, M, A, vol, W, fixed, h, vel, fext));
 
-options=optimset('LargeScale','off','GradObj','on','DerivativeCheck','off','Display','iter','MaxIter',20,'TolFun',1e-5,'TolX',1e-5);
-[Pout, objval] = fminunc(@(x)(ProjDyn_Energy(numEle, numNode, Tt, x, Pold, P0, M, A, vol, W, fixed, h, vel, fext)),Ptt,options);
 
-for i=1:1000
-    Pold = Ptt;
-    [Ptt, objval] = fminunc(@(x)(ProjDyn_Energy(numEle, numNode, Tt, x, Pold, P0, M, A, vol, W, fixed, h, vel, fext)),Ptt,options);
-    vel = reshape( (Ptt - Pold) / h, numNode * 3,1);
-    disp(vel);
-    %Ptt = reshape(Ptt,numEle,numNode);
-    %disp(vel);
-    vel = vel * damping;
-    plot_timestep( handle, numEle ,Tt, Ptt );
-    pause(1/60);
+options=optimset('Algorithm','trust-region-dogleg','Hessian','on','GradObj','on','DerivativeCheck','off','Display','iter','MaxIter',20,'TolFun',1e-5,'TolX',1e-5);
 
-end
+%disp(hessian(@(x)(ProjDyn_Energy(numEle, numNode, Tt, x, Pold, P0, M, A, vol, W, fixed, h, vel, fext,false)),reshape(Ptt,numNode * 3,1)));
+%[e,d,h] = ProjDyn_Energy(numEle, numNode, Tt, Ptt, Pold, P0, M, A, vol, W, fixed, h, vel, fext,true);
+%disp(h);
+
+ for i=1:1000
+     Pold = Ptt;
+     [Ptt, objval] = fminunc(@(x)(ProjDyn_Energy(numEle, numNode, Tt, x, Pold, P0, M, A, vol, W, fixed, h, vel, fext,true)),Ptt,options);
+     vel = reshape( (Ptt - Pold) / h, numNode * 3,1);
+     %disp(vel);
+     %Ptt = reshape(Ptt,numEle,numNode);
+     %disp(vel);
+     vel = vel * damping;
+     plot_timestep( handle, numEle ,Tt, Ptt );
+     pause(1/60);
+ 
+ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 

@@ -19,6 +19,7 @@ for i=1:numEle
     [R S] = poldec(F);
     
     %mat(i,:) = R;
+%disp(inner(S - eye(3),S - eye(3)));
     edgemat(:,i) = reshape(R * Dm, 9,1);
     
     Fs(:,:,i) = F;

@@ -21,9 +21,10 @@ function [ ret retvel ] = ProjDyn_timestep( numEle, numNode, Tt, Pt, P0, M, A, V
             L(2,index(4)) = -1;
             L(3,index(4)) = -1;
             
-            L = kron(L, eye(3));
+            L = kron(L, eye(3));          
             
-            b = b + L' * edges(:,i) * Vol(i) * W(i); 
+            b = b + L' * edges(:,i) * Vol(i) * W(i);
+            
         end
         
         q = A * b; 
